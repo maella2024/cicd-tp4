@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [boudinm]
+
+jobs:
+  test-and-report:
+    name: Tests + Allure Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+    
+      - name: Python
+        uses: actions/setup-python@v4
+        with:
+            python-version: '3.11'
+            cache: 'pip'
+      - name: Install dependencies
+        uses: |
+            pip install --upgrade pip
+            pip install -r requirement.txt
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+            node-version: '18'
+    
+      - name: Installation Allure
+        uses: |
+            npm install -g allure-commandline
+            allure --version
+      - name: Run test
+        continue-on-error: true
+        run: |
+            allure generate reports --clean -o allure-report
+
+      - name: Upload Allure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+            name: allure-results
+            path: reports/
+            retention-days: 30
+
+    
+
+
+
+      
